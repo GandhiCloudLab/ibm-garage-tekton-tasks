@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: ibm-java-maven
+  name: igc-01-wcare-web
 spec:
   params:
     - name: git-url
@@ -12,6 +12,9 @@ spec:
     - name: scan-image
       description: Flag indicating that an image scan should be performed
       default: "true"
+    - name: image-url
+      description: image-url
+      default: ""
   tasks:
     - name: setup
       taskRef:
@@ -57,11 +60,55 @@ spec:
           value: "$(tasks.setup.results.image-repository)"
         - name: image-tag
           value: "$(tasks.setup.results.image-tag)"
+    - name: keyprotect
+      taskRef:
+        kind: Task
+        name: ibm-keyprotect
+      runAfter:
+      - build
+      params:
+      - name: git-url
+        value: $(tasks.setup.results.git-url)
+      - name: git-revision
+        value: $(tasks.setup.results.git-revision)
+      - name: source-dir
+        value: $(tasks.setup.results.source-dir)
+      - name: image-server
+        value: $(tasks.setup.results.image-server)
+      - name: image-namespace
+        value: $(tasks.setup.results.image-namespace)
+      - name: image-repository
+        value: $(tasks.setup.results.image-repository)
+      - name: image-tag
+        value: $(tasks.setup.results.image-tag)
+      - name: image-release
+        value: $(tasks.setup.results.image-release)
+      - name: image-url
+        value: $(params.image-url)
+    - name: image-enforcement
+      taskRef:
+        kind: Task
+        name: ibm-img-enforce
+      runAfter:
+      - keyprotect
+      params:
+      - name: image-server
+        value: $(tasks.setup.results.image-server)
+      - name: image-namespace
+        value: $(tasks.setup.results.image-namespace)
+      - name: image-repository
+        value: $(tasks.setup.results.image-repository)
+      - name: image-release
+        value: $(tasks.setup.results.image-release)
+      - name: app-name
+        value: $(tasks.setup.results.app-name)
+      - name: tools-image
+        value: $(tasks.setup.results.tools-image)
     - name: deploy
       taskRef:
         name: ibm-deploy
       runAfter:
-        - build
+        - image-enforcement
       params:
         - name: git-url
           value: "$(tasks.setup.results.git-url)"
