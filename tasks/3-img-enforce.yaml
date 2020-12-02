@@ -19,13 +19,13 @@ spec:
       default: "false"
     - default: 'garagecatalyst/ibmcloud-dev:1.1.3'
       name: tools-image
-      type: string      
+      type: string
     - default: ""
       name: image-namespace
       type: string
     - default: ""
       name: image-server
-      type: string      
+      type: string
     - default: ""
       name: app-name
       type: string
@@ -34,7 +34,7 @@ spec:
       type: string
     - default: ""
       name: image-repository
-      type: string       
+      type: string
   volumes:
     - name: oci-image
       emptyDir: {}
@@ -83,7 +83,7 @@ spec:
             configMapKeyRef:
               name: ibmcloud-config
               key: REGION
-              optional: true              
+              optional: true
       volumeMounts:
         - mountPath: /var/oci
           name: oci-image
@@ -97,8 +97,8 @@ spec:
         helm init --client-only 1> /dev/null 2> /dev/null
         helm version --client
         helm repo add iks-charts https://icr.io/helm/iks-charts
-        helm status cise || helm install --name cise iks-charts/ibmcloud-image-enforcement
-        
+        helm status cise || helm install cise iks-charts/ibmcloud-image-enforcement
+
         APP_IMAGE="$(params.image-server)/$(params.image-namespace)"
         echo ${APP_IMAGE}
 
@@ -120,7 +120,7 @@ spec:
         EOF
         cat securityPolicy.yaml
         #kubectl get ImagePolicy -n $(params.image-namespace) ibmcloud-$(params.app-name)-image-enforce-policy | kubectl delete ImagePolicy -n $(params.image-namespace) ibmcloud-$(params.app-name)-image-enforce-policy
-        kubectl apply -f securityPolicy.yaml -n $(params.image-namespace) 
+        kubectl apply -f securityPolicy.yaml -n $(params.image-namespace)
         kubectl get ImagePolicy -n $(params.image-namespace)
         kubectl get ClusterImagePolicy
         REGISTRY_SERVER_FROM=$(echo "$(params.image-server)" | awk -F : '{print $1}')
