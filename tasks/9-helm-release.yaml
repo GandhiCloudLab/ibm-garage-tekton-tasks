@@ -65,6 +65,8 @@ spec:
         git checkout $(params.git-revision)
     - name: package-helm
       image: $(params.tools-image)
+      securityContext:
+        privileged: true
       workingdir: $(params.source-dir)
       env:
         - name: TLS_SECRET_NAME
@@ -274,5 +276,3 @@ spec:
           curl ${CURL_FLAGS} -u${HELM_USER}:${HELM_PASSWORD} -s -T index.yaml "${HELM_URL}/${IMAGE_NAMESPACE}/index.yaml"
 
           echo -n "${HELM_URL}/${IMAGE_NAMESPACE}" | tee $(results.helm-url.path)
-
-

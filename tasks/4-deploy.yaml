@@ -71,6 +71,8 @@ spec:
     - name: deploy
       image: $(params.tools-image)
       workingdir: $(params.source-dir)
+      securityContext:
+        privileged: true
       env:
         - name: TLS_SECRET_NAME
           valueFrom:
@@ -178,4 +180,3 @@ spec:
           done
           SERVICE_PORT=$(kubectl get svc "${APP_NAME}" -n "${APP_NAMESPACE}" -o jsonpath="{.spec.ports[?(@.name == 'http')].port}")
           echo -n "${SERVICE_PORT}" | tee $(results.service-port.path)
-
